@@ -2,6 +2,10 @@
 
 ## Recent change notes
 
+### 0.4.1-dev.10
+
+* Committment control - Experimental!!!
+
 ### 0.4.1-dev.2
 
 * Better management of socket error.
