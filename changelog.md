@@ -2,9 +2,17 @@
 
 ## Recent change notes
 
+### 0.4.1-dev.10.1
+
+* Merged 0.4.1-dev.2.1 fix
+
 ### 0.4.1-dev.10
 
 * Committment control - Experimental!!!
+
+### 0.4.1-dev.2.1
+
+* Fix - socket error on connect was not catched
 
 ### 0.4.1-dev.2
 
