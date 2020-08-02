@@ -7,5 +7,5 @@ class MongoDartError extends Error {
   MongoDartError(this.message, {this.errorCode});
   
   @override
-  String toString() => "MongoDart Error: $message";
+  String toString() => 'MongoDart Error: $message';
 }
