@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 
-import 'db/discover_blocked_transactions.dart';
 import 'utils/arguments_abort.dart';
 
 final log = Logger('blocked_transactions');

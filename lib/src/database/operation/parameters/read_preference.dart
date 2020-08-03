@@ -86,7 +86,7 @@ class ReadPreference {
       : options = options ?? <String, Object>{},
         maxStalenessSeconds = getMaxStalenessSeconds(options),
         minWireVersion = getMinWireVersion(options) {
-    if (this.mode == ReadPreferenceMode.primary) {
+    if (mode == ReadPreferenceMode.primary) {
       if (tags != null && tags.isNotEmpty) {
         throw ArgumentError(
             'Primary read preference cannot be combined with tags');
@@ -108,9 +108,8 @@ class ReadPreference {
       return ReadPreference(
           readPreference, options[keyReadPreferenceTags] as List);
     } else if (readPreference is Map) {
-      ReadPreferenceMode mode =
-          (readPreference[keyMode] as ReadPreferenceMode) ??
-              (readPreference[keyPreference] as ReadPreferenceMode);
+      var mode = (readPreference[keyMode] as ReadPreferenceMode) ??
+          (readPreference[keyPreference] as ReadPreferenceMode);
       if (mode != null) {
         return ReadPreference(mode, readPreference[keyTags] as List,
             {keyMaxStalenessSecond: readPreference[keyMaxStalenessSecond]});
@@ -132,7 +131,7 @@ class ReadPreference {
   /// @method
   /// @return {boolean}
   /// @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
-  bool get slaveOk => needSlaveOk.contains(this.mode);
+  bool get slaveOk => needSlaveOk.contains(mode);
 
   @override
   bool operator ==(other) => other is ReadPreference && mode == other.mode;
@@ -141,7 +140,7 @@ class ReadPreference {
   int get hashCode => mode.hashCode;
 
   Map<String, Object> toJSON() {
-    Map<String, Object> readPreference = {
+    var readPreference = <String, Object>{
       keyMode: '$mode'.replaceFirst('ReadPreferenceMode.', '')
     };
     if (tags != null) {

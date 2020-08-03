@@ -15,10 +15,10 @@ Future<Map<String, Map<String, dynamic>>> discoverBlockedTransactions(
       .forEach((element) async {
     if (element[TtsDb.headerChildrenList] != null &&
         element[TtsDb.headerChildrenList].isNotEmpty) {
-      if (await _discoverActiveChildren(db, dateLimit, element["_id"])) {
+      if (await _discoverActiveChildren(db, dateLimit, element['_id'])) {
         return;
       }
-      if (await _discoverActiveChildren(db, dateLimit, element["_id"])) {
+      if (await _discoverActiveChildren(db, dateLimit, element['_id'])) {
         return;
       }
     }

@@ -14,7 +14,7 @@ SelectorBuilder _selectorToSelectorBuilder(Object selector) {
   if (selector is SelectorBuilder) {
     return selector;
   } else if (selector is Map) {
-    return SelectorBuilder()..map[r"$query"] = selector;
+    return SelectorBuilder()..map[r'$query'] = selector;
   }
   assert(false, 'Unknown selector type "${selector.runtimeType}"');
   return null;
@@ -40,7 +40,7 @@ class TtsCollection extends TypedCollection {
     if (document.containsKey(docId)) {
       documentId = document[docId] as ObjectId;
     }
-    bool isUpdate = true;
+    var isUpdate = true;
     if (documentId == null) {
       isUpdate = false;
       documentId = ObjectId();
@@ -51,7 +51,7 @@ class TtsCollection extends TypedCollection {
 
     if (lockId == null) {
       throw MongoDartError('The table is already locked by another transaction',
-          errorCode: "Tco01");
+          errorCode: 'Tco01');
     }
     if (transactionId == null) {
       Map returnSave;
@@ -72,7 +72,7 @@ class TtsCollection extends TypedCollection {
         oldDocument = null;
       }
     }
-    final bool updateLock = await _updateLockDocument(lockId,
+    final updateLock = await _updateLockDocument(lockId,
         previousDocument: oldDocument, newDocument: document);
     if (!updateLock) {
       //Todo What To Do?
