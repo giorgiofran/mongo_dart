@@ -12,7 +12,7 @@
 
 ### 0.4.1-dev.2.2
 
-* Partial lint clean-up
+* Lint clean-up
 
 ### 0.4.1-dev.2.1
 
