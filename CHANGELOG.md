@@ -2,13 +2,22 @@
 
 ## Recent change notes
 
-### 0.4.1-dev.10.1
+### 0.4.2-dev.10.1
 
 * Merged 0.4.1-dev.2.1 fix
 
-### 0.4.1-dev.10
+### 0.4.2-dev.10
 
 * Committment control - Experimental!!!
+
+### 0.4.1
+
+* Secure Connection
+* The connection string now accepts more than one server.
+  * Before: only mongodb://www.example.org/test.
+  * Now it can be: mongodb://www.example.org,www1.example.org,www2.example.org/test
+  * It is equivalent to: db.pool([mongodb://www.example.org/test, mongodb://www1.example.org/test, mongodb://www2.example.org/test]);  
+* Added an "uriList" getter in "Db" class.
 
 ### 0.4.1-dev.2.2
 
