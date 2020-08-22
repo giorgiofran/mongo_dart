@@ -108,9 +108,8 @@ class ReadPreference {
       return ReadPreference(
           readPreference, options[keyReadPreferenceTags] as List);
     } else if (readPreference is Map) {
-      var mode =
-          (readPreference[keyMode] as ReadPreferenceMode) ??
-              (readPreference[keyPreference] as ReadPreferenceMode);
+      var mode = (readPreference[keyMode] as ReadPreferenceMode) ??
+          (readPreference[keyPreference] as ReadPreferenceMode);
       if (mode != null) {
         return ReadPreference(mode, readPreference[keyTags] as List,
             {keyMaxStalenessSecond: readPreference[keyMaxStalenessSecond]});
