@@ -319,7 +319,6 @@ class Db {
     for (var uri in _uriList) {
       _connectionManager.addConnection(_parseUri(uri, isSecure: secure));
     }
-
     return _connectionManager.open(writeConcern);
   }
 
