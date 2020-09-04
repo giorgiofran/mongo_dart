@@ -130,8 +130,14 @@ class Db {
 
   _Connection get _masterConnection => _connectionManager.masterConnection;
 
-  _Connection get _masterConnectionVerified =>
-      _connectionManager.masterConnectionVerified;
+  _Connection get _masterConnectionVerified {
+    if (state != State.OPEN) {
+      throw MongoDartError(
+          'The required operation can be executed only when the db is open');
+    }
+    return _connectionManager.masterConnectionVerified;
+  }
+
   WriteConcern _writeConcern;
   AuthenticationScheme _authenticationScheme;
   ReadPreference readPreference = ReadPreference.primary;
@@ -313,9 +319,15 @@ class Db {
     for (var uri in _uriList) {
       _connectionManager.addConnection(_parseUri(uri, isSecure: secure));
     }
-  
     return _connectionManager.open(writeConcern);
   }
+
+  /// Is connected returns true if the database is in state `OPEN`
+  /// and at least the primary connection is connected
+  ///
+  /// Connections can disconect because of network or database server problems.
+  bool get isConnected =>
+      state == State.OPEN && (_masterConnection?.connected ?? false);
 
   Future<Map<String, dynamic>> executeDbCommand(MongoMessage message,
       {_Connection connection}) async {
