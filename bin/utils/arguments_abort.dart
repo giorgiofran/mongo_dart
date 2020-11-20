@@ -34,7 +34,9 @@ ArgResults parseArgumentsAbort(List<String> args) {
   ArgResults results;
   try {
     results = parser.parse(args);
-    if (results[parmVerbose] && results[parmDebug]) {
+    if (results[parmHelp]) {
+      print(parser.usage);
+    } else if (results[parmVerbose] && results[parmDebug]) {
       log.severe(
           'You cannot specify the --verbose and the --debug options together');
       return null;
@@ -45,8 +47,6 @@ ArgResults parseArgumentsAbort(List<String> args) {
         results[parmTransactionId] == '') {
       log.severe('The Transaction Id parameter is mandatory');
       return null;
-    } else if (results[parmHelp]) {
-      print(parser.usage);
     }
   } on FormatException catch (e) {
     log.severe('$e');

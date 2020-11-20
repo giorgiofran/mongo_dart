@@ -38,7 +38,9 @@ ArgResults parseArgumentsBlocked(List<String> args) {
   ArgResults results;
   try {
     results = parser.parse(args);
-    if (results[parmVerbose] && results[parmDebug]) {
+    if (results[parmHelp]) {
+      print(parser.usage);
+    } else if (results[parmVerbose] && results[parmDebug]) {
       log.severe(
           'You cannot specify the --verbose and the --debug options together');
       return null;
@@ -49,8 +51,6 @@ ArgResults parseArgumentsBlocked(List<String> args) {
       log.severe(
           'Parameter minutes ("${results[parmMinutes]}") is not a valid number');
       return null;
-    } else if (results[parmHelp]) {
-      print(parser.usage);
     }
   } on FormatException catch (e) {
     log.severe('$e');
