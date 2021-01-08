@@ -6,7 +6,9 @@ class GridIn extends GridFSFile {
   int currentChunkNumber = 0;
   int currentBufferPosition = 0;
   int totalBytes = 0;
+  @override
   GridFS fs;
+  @override
   String filename;
 
   ///TODO Review that code. Currently it sums all file's content in one (potentially big) List, to get MD5 hash

@@ -1,4 +1,4 @@
-part of mongo_dart;
+/* part of mongo_dart;
 
 class WriteResult extends AbstractWriteResult {
   dynamic id;
@@ -19,3 +19,4 @@ class WriteResult extends AbstractWriteResult {
   bool get isSuccess =>
       super.isSuccess && !hasWriteError() && !hasWriteConcernError();
 }
+ */

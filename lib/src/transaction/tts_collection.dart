@@ -47,7 +47,7 @@ class TtsCollection extends TypedCollection {
       document[docId] = documentId;
     }
 
-    final ObjectId lockId = await lockDocument(transactionId, documentId);
+    final lockId = await lockDocument(transactionId, documentId);
 
     if (lockId == null) {
       throw MongoDartError('The table is already locked by another transaction',
@@ -120,7 +120,7 @@ class TtsCollection extends TypedCollection {
       return super.insertAll(documents, writeConcern: writeConcern);
     }
 
-    final List<ObjectId> documentIdList = <ObjectId>[];
+    final documentIdList = <ObjectId>[];
     ObjectId documentId;
     for (Map document in documents) {
       documentId = (document[docId] ?? ObjectId()) as ObjectId;
@@ -128,12 +128,11 @@ class TtsCollection extends TypedCollection {
       documentIdList.add(documentId);
     }
 
-    final Map<ObjectId, ObjectId> lockIds =
-        await lockDocuments(transactionId, documentIdList);
+    final lockIds = await lockDocuments(transactionId, documentIdList);
 
     if (lockIds == null) {
       throw MongoDartError('The table is already locked by another transaction',
-          errorCode: "Tco01");
+          errorCode: 'Tco01');
     }
     if (transactionId == null) {
       final Map returnInsert =
@@ -143,8 +142,7 @@ class TtsCollection extends TypedCollection {
     }
 
     for (Map document in documents) {
-      final bool updateLock = await _updateLockDocument(
-          lockIds[document[docId]],
+      final updateLock = await _updateLockDocument(lockIds[document[docId]],
           newDocument: document);
       if (!updateLock) {
         //Todo What To Do?
@@ -206,20 +204,19 @@ class TtsCollection extends TypedCollection {
   Future<Map<String, dynamic>> _updateAllTts(
       selector, document, ObjectId transactionId, List<Map> keyMapList,
       {WriteConcern writeConcern}) async {
-    final List<ObjectId> documentIdList = <ObjectId>[];
+    final documentIdList = <ObjectId>[];
     ObjectId documentId;
     for (Map document in keyMapList) {
       documentId = document[docId] as ObjectId;
-      assert(documentId != null, "Document Id cannot be null here");
+      assert(documentId != null, 'Document Id cannot be null here');
       documentIdList.add(documentId);
     }
 
-    final Map<ObjectId, ObjectId> lockIds =
-        await lockDocuments(transactionId, documentIdList);
+    final lockIds = await lockDocuments(transactionId, documentIdList);
 
     if (lockIds == null) {
       throw MongoDartError('The table is already locked by another transaction',
-          errorCode: "Tco01");
+          errorCode: 'Tco01');
     }
     if (transactionId == null) {
       final Map returnUpdate = await super.update(selector, document,
@@ -228,13 +225,11 @@ class TtsCollection extends TypedCollection {
       return returnUpdate as Map<String, dynamic>;
     }
 
-    final List<Map<String, dynamic>> documents = await find(selector).toList();
+    final documents = await find(selector).toList();
 
-    for (Map<String, dynamic> oldDocument in documents) {
-      final bool updateLock = await _updateLockDocument(
-          lockIds[document[docId]],
-          previousDocument: oldDocument,
-          newDocument: document);
+    for (var oldDocument in documents) {
+      final updateLock = await _updateLockDocument(lockIds[document[docId]],
+          previousDocument: oldDocument, newDocument: document);
       if (!updateLock) {
         //Todo What To Do?
       }
@@ -544,12 +539,12 @@ class TtsCollection extends TypedCollection {
   @override
   Future<Map<String, dynamic>> findAndModify(
       {query, sort, bool remove, update, bool returnNew, fields, bool upsert}) {
-    throw MongoDartError('Still to be implemented', errorCode: "Tco12");
+    throw MongoDartError('Still to be implemented', errorCode: 'Tco12');
   }
 
   @override
   Future<bool> drop() =>
-      throw MongoDartError('Still to be implemented', errorCode: "Tco13");
+      throw MongoDartError('Still to be implemented', errorCode: 'Tco13');
 
   @override
   Future<Map<String, dynamic>> distinct(String field, [selector]) {
@@ -558,25 +553,25 @@ class TtsCollection extends TypedCollection {
       return super.distinct(field, selector);
     }
     return throw MongoDartError('distinct Still to be implemented',
-        errorCode: "Tco14");
+        errorCode: 'Tco14');
   }
 
   @override
   Future<Map<String, dynamic>> aggregate(List pipeline,
           {bool allowDiskUse = false, Map<String, dynamic> cursor}) =>
-      throw MongoDartError('Still to be implemented', errorCode: "Tco15");
+      throw MongoDartError('Still to be implemented', errorCode: 'Tco15');
 
   @override
   Stream<Map<String, dynamic>> aggregateToStream(List pipeline,
           {Map<String, dynamic> cursorOptions = const {},
           bool allowDiskUse = false}) =>
-      throw MongoDartError('Still to be implemented', errorCode: "Tco16");
+      throw MongoDartError('Still to be implemented', errorCode: 'Tco16');
 
   Future<bool> _checkLockCompatibility(ObjectId transactionId, int lockType,
       {ObjectId documentId, int lockLevel}) async {
-    final Map<ObjectId, bool> transactions = <ObjectId, bool>{};
+    final transactions = <ObjectId, bool>{};
 
-    final SelectorBuilder selector = where
+    final selector = where
         .eq(TtsDb.transactionCollectionName, collectionName)
         .ne(TtsDb.transactionTransactionId, transactionId);
 
@@ -584,7 +579,7 @@ class TtsCollection extends TypedCollection {
       final Map headerMap =
           await (db as TtsDb).headerCollection.findOne(where.id(transactionId));
       assert(headerMap != null,
-          "Not exixsting transaction Id in call to _checkLockCompatibility");
+          'Not exixsting transaction Id in call to _checkLockCompatibility');
       if ((headerMap[TtsDb.headerParentTransactions] as List).isNotEmpty) {
         selector.and(where.nin(TtsDb.transactionTransactionId,
             headerMap[TtsDb.headerParentTransactions] as List));
@@ -598,10 +593,10 @@ class TtsCollection extends TypedCollection {
 
     final Stream<Map> ret = (db as TtsDb).transactionCollection.find(selector);
     await for (Map document in ret) {
-      final ObjectId transactionId =
+      final transactionId =
           document[TtsDb.transactionTransactionId] as ObjectId;
       if (transactionId != null) {
-        bool trStatus = transactions[transactionId];
+        var trStatus = transactions[transactionId];
         if (trStatus == null) {
           trStatus = await (db as TtsDb).isTransactionClosed(transactionId);
           transactions[transactionId] = trStatus;
@@ -610,13 +605,12 @@ class TtsCollection extends TypedCollection {
           continue;
         }
       }
-      final int documentLock =
-          (document[TtsDb.transactionLockType] as int) << 16;
-      final bool checkResult = lockCompatibilityMap[documentLock | lockType];
+      final documentLock = (document[TtsDb.transactionLockType] as int) << 16;
+      final checkResult = lockCompatibilityMap[documentLock | lockType];
       assert(
           checkResult != null,
-          "Lock Combination between existing "
-          "${document[TtsDb.transactionLockType]} and $lockType is missing");
+          'Lock Combination between existing '
+          '${document[TtsDb.transactionLockType]} and $lockType is missing');
       if (!checkResult) {
         return false;
       }
@@ -629,17 +623,17 @@ class TtsCollection extends TypedCollection {
   /// If all operators are of type "Field Update Operator"
   /// It is a field update type, otherwise a document update type
   bool _checkFieldUpdate(Map<String, dynamic> newUpdate) {
-    for (String key in newUpdate.keys) {
+    for (var key in newUpdate.keys) {
       switch (key) {
-        case r"$currentDate":
-        case r"$inc":
-        case r"$min":
-        case r"$max":
-        case r"$mul":
-        case r"$rename":
-        case r"$set":
-        case r"$setOnInsert":
-        case r"$unset":
+        case r'$currentDate':
+        case r'$inc':
+        case r'$min':
+        case r'$max':
+        case r'$mul':
+        case r'$rename':
+        case r'$set':
+        case r'$setOnInsert':
+        case r'$unset':
           break;
         default:
           return false;
@@ -655,7 +649,7 @@ class TtsCollection extends TypedCollection {
         throw MongoDartError(
             'If the transaction Type is not "lock", '
             'the new or the previous document (or both) are required',
-            errorCode: "Tco17");
+            errorCode: 'Tco17');
       }
       return TtsDb.trTypeLock;
     }
@@ -664,7 +658,7 @@ class TtsCollection extends TypedCollection {
         throw MongoDartError(
             'If the transaction Type is not "delete", '
             'the new document is required',
-            errorCode: "Tco18");
+            errorCode: 'Tco18');
       }
       return TtsDb.trTypeDelete;
     }
@@ -673,7 +667,7 @@ class TtsCollection extends TypedCollection {
         throw MongoDartError(
             'If the transaction Type is not "insert", '
             'the previous document is required',
-            errorCode: "Tco19");
+            errorCode: 'Tco19');
       }
       return TtsDb.trTypeInsert;
     }
@@ -692,11 +686,11 @@ class TtsCollection extends TypedCollection {
     if (newDocument == null) {
       return newDocument;
     }
-    final Map<String, dynamic> ret = <String, dynamic>{};
+    final ret = <String, dynamic>{};
     String newKey;
-    for (String key in newDocument.keys) {
-      if (key.startsWith(r"$")) {
-        newKey = key.replaceFirst(r'$', "dbCommand");
+    for (var key in newDocument.keys) {
+      if (key.startsWith(r'$')) {
+        newKey = key.replaceFirst(r'$', 'dbCommand');
         ret[newKey] = newDocument[key];
       } else {
         ret[key] = newDocument[key];
@@ -716,18 +710,18 @@ class TtsCollection extends TypedCollection {
       } else if (newDocument is Map<String, dynamic>) {
         newDoc = newDocument;
       } else {
-        assert(false, "Unknown modifier type ${newDocument.runtimeType}");
+        assert(false, 'Unknown modifier type ${newDocument.runtimeType}');
       }
       newDoc = _sanitizeNewDocument(newDoc);
     }
-    final ModifierBuilder modifier = modify;
+    final modifier = modify;
     if (previousDocument != null) {
       modifier.set(TtsDb.transactionPreviousDocument, previousDocument);
     }
     if (newDoc != null) {
       modifier.set(TtsDb.transactionNewDocument, newDoc);
     }
-    final int type =
+    final type =
         _checkTransactionType(transactionType, previousDocument, newDoc);
     if (type != null) {
       modifier.set(TtsDb.transactionTransactionType, type);
@@ -765,8 +759,8 @@ class TtsCollection extends TypedCollection {
       {bool allOrNothing}) async {
     allOrNothing ??= true;
     ObjectId lockId;
-    final Map<ObjectId, ObjectId> ret = <ObjectId, ObjectId>{};
-    for (ObjectId documentId in documentIdList) {
+    final ret = <ObjectId, ObjectId>{};
+    for (var documentId in documentIdList) {
       lockId = await lock(transactionId,
           lockType: lkExclusiveLock, documentId: documentId);
       if (lockId == null) {
@@ -802,16 +796,15 @@ class TtsCollection extends TypedCollection {
   Future<ObjectId> lock(ObjectId transactionId,
       {int lockType, ObjectId documentId}) async {
     lockType ??= lkEnsureChanges;
-    final bool isFrozen =
-        await (db as TtsDb).isTransactionFrozen(transactionId);
+    final isFrozen = await (db as TtsDb).isTransactionFrozen(transactionId);
 
     if (isFrozen) {
-      throw MongoDartError("Attempt to lock a frozen transaction",
-          errorCode: "Tco20");
+      throw MongoDartError('Attempt to lock a frozen transaction',
+          errorCode: 'Tco20');
     }
 
-    final ObjectId id = ObjectId();
-    final Map<String, dynamic> document = <String, dynamic>{
+    final id = ObjectId();
+    final document = <String, dynamic>{
       docId: id,
       // transactionId can be null (only when a documentId is specified),
       //   see below,
@@ -836,7 +829,7 @@ class TtsCollection extends TypedCollection {
         throw MongoDartError(
             'Locking outside a transaction is allowed only '
             'for documents (documentId is null)',
-            errorCode: "Tco21");
+            errorCode: 'Tco21');
       }
     }
     if (documentId != null) {
@@ -849,8 +842,7 @@ class TtsCollection extends TypedCollection {
     if (ret['err'] != null || ret['n'] != 1) {
       return null;
     }
-    final bool compatible = await _checkLockCompatibility(
-        transactionId, lockType,
+    final compatible = await _checkLockCompatibility(transactionId, lockType,
         documentId: documentId);
     if (compatible) {
       return id;
@@ -865,7 +857,7 @@ class TtsCollection extends TypedCollection {
   }
 
   Future unlockDocuments(Iterable<ObjectId> lockIds) async {
-    for (ObjectId lockId in lockIds) {
+    for (var lockId in lockIds) {
       await unlockDocument(lockId);
     }
   }
@@ -879,7 +871,7 @@ class TtsCollection extends TypedCollection {
       throw MongoDartError(
           'No lock to remove for collection '
           '$collectionName with "id" = $lockId',
-          errorCode: "Tco22");
+          errorCode: 'Tco22');
     }
   }
 
@@ -900,7 +892,7 @@ class TtsCollection extends TypedCollection {
       throw MongoDartError(
           'No lock to remove for collection '
           '$collectionName in transaction $transactionId',
-          errorCode: "Tco23");
+          errorCode: 'Tco23');
     }
     return await unlock(toBeRemoved.first[docId] as ObjectId);
   }

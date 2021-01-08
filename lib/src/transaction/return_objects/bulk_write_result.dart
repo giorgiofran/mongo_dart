@@ -1,4 +1,4 @@
-part of mongo_dart;
+/* part of mongo_dart;
 
 class BulkWriteResult extends AbstractWriteResult {
 
@@ -13,4 +13,4 @@ class BulkWriteResult extends AbstractWriteResult {
   @override
   bool get isSuccess =>
       super.isSuccess && !hasWriteError() && !hasWriteConcernError();
-}
+} */

@@ -5,7 +5,7 @@ class LastError {
   static const String mapError = 'err';
   static const String mapErrMsg = 'errmsg';
   static const String mapCode = 'code';
-  static const String mapConnectionId = "connectionId";
+  static const String mapConnectionId = 'connectionId';
   static const String mapLastOp = 'lastOp';
   static const String mapNumber = 'n';
   static const String mapSyncMillis = 'syncMillis';

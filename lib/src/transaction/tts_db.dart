@@ -167,8 +167,8 @@ class TtsDb extends Db {
 
   void _unRegisterChildTransaction(Map childTransactionMap) {
     assert(childTransactionMap != null,
-        "null argument in call to _unRegisterChildTransaction");
-    final ObjectId parentTransactionId =
+        'null argument in call to _unRegisterChildTransaction');
+    final parentTransactionId =
         (childTransactionMap[headerParentTransactions] as List<ObjectId>).last;
     (_openTransactions[parentTransactionId.toHexString()][headerChildrenList]
             as List)
@@ -176,13 +176,12 @@ class TtsDb extends Db {
   }
 
   int _getNewTransactionIndex(ObjectId transactionId) {
-    final Map<String, dynamic> transactionMap =
-        _openTransactions[transactionId.toHexString()];
+    final transactionMap = _openTransactions[transactionId.toHexString()];
     if (transactionMap == null || transactionMap.isEmpty) {
       throw ArgumentError(
           'Trying to work on a not existing transaction ($transactionId)');
     }
-    int index = (transactionMap[TtsDb.transactionIndex] as int) ?? 0;
+    var index = (transactionMap[TtsDb.transactionIndex] as int) ?? 0;
     index++;
     transactionMap[TtsDb.transactionIndex] = index;
     return index;
@@ -191,12 +190,12 @@ class TtsDb extends Db {
   Future<ObjectId> openTts(
       {int transactionIsolation, ObjectId parentTransactionId}) async {
     transactionIsolation ??= trIsolationCommittedDocuments;
-    final ObjectId transactionId = ObjectId();
-    List<ObjectId> parentTransactions = <ObjectId>[];
+    final transactionId = ObjectId();
+    var parentTransactions = <ObjectId>[];
     if (parentTransactionId != null) {
       final Map parentHeader =
           await headerCollection.findOne(where.id(parentTransactionId));
-      assert(parentHeader != null, "Missing $parentTransactionId transaction");
+      assert(parentHeader != null, 'Missing $parentTransactionId transaction');
       for (ObjectId element
           in parentHeader[headerParentTransactions] ?? <ObjectId>[]) {
         parentTransactions.add(element);

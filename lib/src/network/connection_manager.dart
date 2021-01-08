@@ -3,16 +3,16 @@ part of mongo_dart;
 class _ConnectionManager {
   final _log = Logger('ConnectionManager');
   final Db db;
-  final _connectionPool = <String, _Connection>{};
+  final _connectionPool = <String, Connection>{};
   final replyCompleters = <int, Completer<MongoResponseMessage>>{};
   final sendQueue = Queue<MongoMessage>();
-  _Connection _masterConnection;
+  Connection _masterConnection;
 
   _ConnectionManager(this.db);
 
-  _Connection get masterConnection => _masterConnection;
+  Connection get masterConnection => _masterConnection;
 
-  _Connection get masterConnectionVerified {
+  Connection get masterConnectionVerified {
     if (_masterConnection != null && !_masterConnection._closed) {
       return _masterConnection;
     } else {
@@ -20,7 +20,7 @@ class _ConnectionManager {
     }
   }
 
-  Future _connect(_Connection connection) async {
+  Future _connect(Connection connection) async {
     await connection.connect();
     var isMasterCommand = DbCommand.createIsMasterCommand(db);
     var replyMessage = await connection.query(isMasterCommand);
@@ -29,6 +29,12 @@ class _ConnectionManager {
     connection.isMaster = master;
     if (master) {
       _masterConnection = connection;
+      MongoModernMessage.maxBsonObjectSize =
+          replyMessage.documents.first[keyMaxBsonObjectSize];
+      MongoModernMessage.maxMessageSizeBytes =
+          replyMessage.documents.first[keyMaxMessageSizeBytes];
+      MongoModernMessage.maxWriteBatchSize =
+          replyMessage.documents.first[keyMaxWriteBatchSize];
     }
     connection.serverCapabilities
         .getParamsFromIstMaster(replyMessage.documents[0]);
@@ -43,25 +49,58 @@ class _ConnectionManager {
     if (connection.serverConfig.userName == null) {
       _log.fine(() => '$db: ${connection.serverConfig.hostUrl} connected');
     } else {
-      await db
-          .authenticate(connection.serverConfig.userName,
-              connection.serverConfig.password,
-              connection: connection)
-          .then((v) {
+      try {
+        await db.authenticate(
+            connection.serverConfig.userName, connection.serverConfig.password,
+            connection: connection);
         _log.fine(() => '$db: ${connection.serverConfig.hostUrl} connected');
-      });
+      } catch (e) {
+        if (connection == _masterConnection) {
+          _masterConnection = null;
+        }
+        await connection.close();
+        rethrow;
+      }
     }
     return true;
   }
 
-  Future open(WriteConcern writeConcern) async {
+  Future<void> open(WriteConcern writeConcern) async {
+    var connectionErrors = [];
     for (var hostUrl in _connectionPool.keys) {
       var connection = _connectionPool[hostUrl];
-      await _connect(connection);
+      try {
+        await _connect(connection);
+      } catch (e) {
+        connectionErrors.add(e);
+      }
+    }
+    if (connectionErrors.isNotEmpty) {
+      if (_masterConnection == null) {
+        for (var error in connectionErrors) {
+          _log.severe('$error');
+        }
+        // Simply returns the first exception to be more compatible
+        // with previous error management.
+        throw connectionErrors.first;
+      } else {
+        for (var error in connectionErrors) {
+          _log.warning('$error');
+        }
+      }
+    }
+    if (masterConnection == null) {
+      throw MongoDartError('No Primary found');
     }
     db.state = State.OPEN;
-    db.masterConnection.serverStatus
-        .processServerStatus(await db.serverStatus());
+
+    if (_masterConnection.serverCapabilities.supportsOpMsg) {
+      await ServerStatusCommand(db,
+              serverStatusOptions: ServerStatusOptions.immutableValues)
+          .updateServerStatus(db.masterConnection);
+    }
+    /*    db.masterConnection.serverStatus
+        .processServerStatus(await db.serverStatus()); */
   }
 
   Future close() async {
@@ -81,11 +120,11 @@ class _ConnectionManager {
   }
 
   void addConnection(ServerConfig serverConfig) {
-    var connection = _Connection(this, serverConfig);
+    var connection = Connection(this, serverConfig);
     _connectionPool[serverConfig.hostUrl] = connection;
   }
 
-  _Connection removeConnection(_Connection connection) {
+  Connection removeConnection(Connection connection) {
     connection.close();
     if (connection.isMaster) {
       _masterConnection = null;
