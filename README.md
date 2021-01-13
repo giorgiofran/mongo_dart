@@ -199,6 +199,10 @@ Please, not that Db.create is an asynchronous constructor, so you have to await 
 
 **Only for who is using mongodb version 3.6 or later**
 **State**: *experimental*
+
+[**Donate** If you need a reliable driver like I do, please help me maintaining this software with a donation. This will allow me to dedicate more time on development, testing and documentation.](https://www.paypal.com/donate?hosted_button_id=YRUNF9YWKX2NW)
+
+
 Starting from 3.6, a new protocol has been developed form mongodb to exchange data with the server.
 We are updating all commands and operation so that we can use the new protocol.
 This will be done gradually.
