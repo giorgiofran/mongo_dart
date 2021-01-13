@@ -796,7 +796,7 @@ Future<Cursor> testCursorCreation() async {
   var cursor =
       await ModernCursor(FindOperation(collection, filter: {'ping': 1}));
 
-  expect(cursor, isNotNull);
+  expect(cursor, isNotNull);  
 
   return Cursor(db, collection, null);
 }
@@ -1034,7 +1034,7 @@ Future testIndexCreationOnCollection() async {
     var resInsert = await collection
         .insertOne({'a': 200}, writeConcern: WriteConcern.UNACKNOWLEDGED);
 
-    // Todo correct
+    // Todo correct 
     //expect(resInsert['ok'], 1.0);
 
     var res = await collection.createIndex(key: 'a', unique: true);
@@ -1108,6 +1108,42 @@ Future testIndexCreationErrorHandling() async {
     expect(e[keyErrmsg] ?? e['err'],
         predicate((String msg) => msg.contains('duplicate key error')));
   }
+}
+
+Future testTextIndex() async {
+  var collectionName = getRandomCollectionName();
+  var collection = db.collection(collectionName);
+
+  var toInsert = <Map<String, dynamic>>[];
+  for (var n = 0; n < 6; n++) {
+    toInsert.add({
+      'a': n,
+      'embedded': {'b': n, 'c': n * 10}
+    });
+  }
+  await collection.insertAll([
+    {'_id': 1, 'name': 'Java Hut', 'description': 'Coffee and cakes'},
+    {'_id': 2, 'name': 'Burger Buns', 'description': 'Gourmet hamburgers'},
+    {'_id': 3, 'name': 'Coffee Shop', 'description': 'Just coffee'},
+    {
+      '_id': 4,
+      'name': 'Clothes Clothes Clothes',
+      'description': 'Discount clothing'
+    },
+    {'_id': 5, 'name': 'Java Shopping', 'description': 'Indonesian goods'}
+  ]);
+
+  var res = await collection
+      .createIndex(keys: {'name': 'text', 'description': 'text'});
+  expect(res['ok'], 1.0);
+
+  var result = await collection.find({
+    r'$text': {r'$search': 'java coffee shop'}
+  }).toList();
+  expect(result.length, 3);
+  expect(result.every((element) {
+    return (element['_id'] as num).remainder(2) == 1;
+  }), isTrue);
 }
 
 Future testSafeModeUpdate() async {
@@ -1478,6 +1514,7 @@ void main() async {
       test(
           'testEnsureIndexWithIndexCreation', testEnsureIndexWithIndexCreation);
       test('testIndexCreationErrorHandling', testIndexCreationErrorHandling);
+      test('Text index', testTextIndex);
     });
 
     group('Field level update tests:', () {

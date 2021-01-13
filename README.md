@@ -7,7 +7,7 @@ Server-side driver library for MongoDb implemented in pure Dart.
 
 ## Development release
 
-Please, note that this is a development release, publish only to permit testing and suggestion from the users. Do not use in production.  See OP_MSG section
+Please, note that this is a development release, published only to permit testing and suggestions from the users. Do not use in production.  See OP_MSG section
 
 ## Basic usage
 
@@ -194,14 +194,12 @@ Please, not that Db.create is an asynchronous constructor, so you have to await 
   await db.open();
 ```
 
-
 ### OP_MSG
 
-**Only for who is using mongodb version 3.6 or later**
+**Only for those using mongodb version 3.6 or later**
 **State**: *experimental*
 
 [**Donate** If you need a reliable driver like I do, please help me maintaining this software with a donation. This will allow me to dedicate more time on development, testing and documentation.](https://www.paypal.com/donate?hosted_button_id=YRUNF9YWKX2NW)
-
 
 Starting from 3.6, a new protocol has been developed form mongodb to exchange data with the server.
 We are updating all commands and operation so that we can use the new protocol.
@@ -223,7 +221,7 @@ Something on the bulk write side has been done too:
 There is the new collection helper method bulkWrite. The syntax is quite similar to that of the shell:
 `collection.bulkWrite([{'insertOne': {'document': { "_id" : 1, "char" : "Brisbane", "class" : "monk", "lvl" : 4 }}}]);`
 Like the in the shell you can define the `insertOne`, `deleteOne` and `deleteMany` operations. `updateOne`, `updateMany` and `replaceOne` must be still developed.
-In addition to the shell operation, you can use also an `insertMany` operation, with the following sybtax: 
+In addition to the shell operation, you can use also an `insertMany` operation, with the following sybtax:
 `collection.bulkWrite([{'insertMany': {'documents': [{ "_id" : 1, "char" : "Brisbane", "class" : "monk", "lvl" : 4 }]}}]);`
 Unlike the insertMany helper, this bulk operation does not suffer of the max number of documents per message limitation.
 
