@@ -148,7 +148,7 @@ class FindOptions {
       throw MongoDartError('Batch size parameter must be a non negative value');
     }
     if (maxTimeMS != null && maxTimeMS < 1) {
-      throw MongoDartError('Batch size parameter must be a positivee value');
+      throw MongoDartError('MaxTimeMS parameter must be a positive value');
     }
   }
 

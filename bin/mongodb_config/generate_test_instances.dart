@@ -1,10 +1,17 @@
 import 'generate_replica_set.dart';
+import 'generate_sharded_cluster.dart';
 import 'generate_standalone.dart';
 import 'mongodb_version_config.dart';
 
 /// List of versions to be considered for configuration and scripts generation
 List<MongoDbVersionConfig> versions = <MongoDbVersionConfig>[
-  MongoDbVersionConfig('ver-4.2', '/home/giorgio/mongoDb/mongodb-4.2.2',
+  MongoDbVersionConfig('ver.3.6', '/home/giorgio/mongoDb/mongodb-3.6.21',
+      '/mnt/xfs/mongodb/data', '/home/giorgio/mongodb-test-sh'),
+  MongoDbVersionConfig('ver.4.0', '/home/giorgio/mongoDb/mongodb-4.0.21',
+      '/mnt/xfs/mongodb/data', '/home/giorgio/mongodb-test-sh'),
+  MongoDbVersionConfig('ver.4.2', '/home/giorgio/mongoDb/mongodb-4.2.2',
+      '/mnt/xfs/mongodb/data', '/home/giorgio/mongodb-test-sh'),
+  MongoDbVersionConfig('ver.4.4', '/home/giorgio/mongoDb/mongodb-4.4.2',
       '/mnt/xfs/mongodb/data', '/home/giorgio/mongodb-test-sh')
 ];
 
@@ -75,8 +82,15 @@ Future<void> main() async {
           'for version "${config.versionName}"');
     }
 
-    // Create Sharded Cluster
-    // Todo to be done yet
-
+    /// Create Sharded Cluster
+    /// For recreate a configuration is needed to delete the sharded cluster
+    /// data folder. This will delete all your data (but it should be only
+    /// test data)
+    try {
+      await generateShardedCluster(config);
+    } catch (e) {
+      print('Could not generate sharded cluster environment '
+          'for version "${config.versionName}"');
+    }
   }
 }

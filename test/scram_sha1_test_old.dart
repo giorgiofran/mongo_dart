@@ -1,4 +1,6 @@
-import 'package:test/test.dart';
+// mongolab.com address does not authenticate any more.
+
+/* import 'package:test/test.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 
 void main() {
@@ -10,3 +12,4 @@ void main() {
     await db.close();
   });
 }
+ */

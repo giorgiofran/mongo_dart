@@ -21,7 +21,7 @@ Future<IsolateInfo> runServer(
     daemon.path,
     host ?? '127.0.0.1',
     port ?? '27017',
-    dbPath.path,
+    dbPath?.path ?? '',
     moreParameters
   ]);
 

@@ -650,7 +650,7 @@ db.runCommand(
   expect(p1['\$group'], isNotNull);
   // set batchSize parameter to split response to 2 chunks
   var aggregate = await collection
-      .aggregateToStream(pipeline,
+      .legacyAggregateToStream(pipeline,
           cursorOptions: {'batchSize': 1}, allowDiskUse: true)
       .toList();
 

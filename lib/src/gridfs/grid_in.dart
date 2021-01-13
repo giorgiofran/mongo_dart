@@ -40,7 +40,7 @@ class GridIn extends GridFSFile {
     var futures = <Future>[];
     var completer = Completer<Map<String, dynamic>>();
 
-    _onDone() {
+    void _onDone() {
       Future.wait(futures).then((list) {
         return finishData();
       }).then((map) {

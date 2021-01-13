@@ -5,9 +5,12 @@ import 'isolate_info.dart';
 import 'mongodb_version_config.dart';
 import 'run_server.dart';
 
-String createAdminJs = "db.createUser({user: 'Admin', pwd: 'admin',"
+String createAdminJs = "db.createUser({user: 'admin', pwd: 'admin',"
     "roles: [ { role: 'userAdminAnyDatabase', db: 'admin' },"
     " 'readWriteAnyDatabase' ]})";
+String createUserJs =
+    "db.getSiblingDB('mongodb-auth').createUser({user: 'test', pwd: 'test',"
+    "roles: [ { role: 'readWrite', db: 'mongodb-auth' } ]})";
 
 /// generates a replica set with name "mongo_dart_test"
 void generateStandalone(MongoDbVersionConfig config,
@@ -60,8 +63,6 @@ void generateStandalone(MongoDbVersionConfig config,
 
   IsolateInfo std;
   if (withAuth) {
-    // Start three instances on port 27017, 27018 and 27019 with reference
-    // to replica set "mongo_dart_test".
     std = await runServer(config, mongodDaemonFile, dbPathStdDir,
         host: '127.0.0.1', port: '27017');
 
@@ -69,7 +70,7 @@ void generateStandalone(MongoDbVersionConfig config,
     await Future.delayed(Duration(seconds: 5));
 
     // Create admin
-    final result = await Process.run(
+    var result = await Process.run(
         mongoShell.path,
         [
           '127.0.0.1:27017/admin',
@@ -81,8 +82,35 @@ void generateStandalone(MongoDbVersionConfig config,
     if (result.exitCode != 0 ||
         (result.stderr != null && result.stderr.isNotEmpty)) {
       print(result.stderr);
+      print(result.stdout);
     }
-    print(result.stdout);
+    print('Restarting server');
+    await quitServer(std, mongodDaemonFile, dbPathStdDir);
+
+    std = await runServer(config, mongodDaemonFile, dbPathStdDir,
+        host: '127.0.0.1', port: '27017', moreParameters: ['--auth']);
+    // let server wake up
+    await Future.delayed(Duration(seconds: 5));
+
+    // Create user
+    result = await Process.run(
+        mongoShell.path,
+        [
+          '127.0.0.1:27017/admin',
+          '-u',
+          'admin',
+          '-p',
+          'admin',
+          '--eval',
+          '$createUserJs',
+        ],
+        runInShell: true);
+
+    if (result.exitCode != 0 ||
+        (result.stderr != null && result.stderr.isNotEmpty)) {
+      print(result.stderr);
+      print(result.stdout);
+    }
   }
 
   var scriptFile = File('${config.absoluteLaunchScriptPath}/mdt_'
@@ -110,8 +138,8 @@ void generateStandalone(MongoDbVersionConfig config,
     scriptContent.write('gnome-terminal --title "Mongo Shell" -- ');
   }
   scriptContent.writeln('sh -c "${mongoShell.path} '
-      '127.0.0.1:27017/${withAuth ? 'admin ' : 'mongo-dart '} '
-      '${withAuth ? '-u Admin -p admin' : ''}; bash"');
+      '127.0.0.1:27017/${withAuth ? 'mongodb-auth ' : 'mongo-dart '} '
+      '${withAuth ? '-u test -p test' : ''}; bash"');
 
   await scriptFile.writeAsString(
     '$scriptContent',

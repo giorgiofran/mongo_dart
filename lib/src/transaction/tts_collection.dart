@@ -562,7 +562,7 @@ class TtsCollection extends TypedCollection {
       throw MongoDartError('Still to be implemented', errorCode: 'Tco15');
 
   @override
-  Stream<Map<String, dynamic>> aggregateToStream(List pipeline,
+  Stream<Map<String, dynamic>> legacyAggregateToStream(List pipeline,
           {Map<String, dynamic> cursorOptions = const {},
           bool allowDiskUse = false}) =>
       throw MongoDartError('Still to be implemented', errorCode: 'Tco16');

@@ -23,8 +23,8 @@ void run_server_isolate(SendPort mainToIsolate) async {
               '$host',
               '--port',
               '$hostPort',
-              '--dbpath',
-              '$dbPath',
+              if (dbPath.isNotEmpty) '--dbpath',
+              if (dbPath.isNotEmpty) '$dbPath',
               ...?moreParameters
             ],
             runInShell: true);
