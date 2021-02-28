@@ -6,7 +6,7 @@ library mongo_dart;
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:convert' show base64, utf8;
+import 'dart:convert' show base64, json, utf8;
 import 'dart:io' show File, FileMode, IOSink, SecureSocket, Socket;
 import 'dart:math';
 import 'dart:typed_data';
@@ -95,3 +95,15 @@ part 'src/network/connection_manager.dart';
 part 'src/network/mongo_message_transformer.dart';
 
 part 'src/network/packet_converter.dart';
+
+part 'src/transaction/return_objects/typed_collection.dart';
+part 'src/transaction/return_objects/last_error.dart';
+//part 'src/transaction/return_objects/write_error.dart';
+//part 'src/transaction/return_objects/write_concern_error.dart';
+//part 'src/transaction/return_objects/abstract_write_result.dart';
+//part 'src/transaction/return_objects/write_result.dart';
+//part 'src/transaction/return_objects/bulk_write_result.dart';
+//part 'src/transaction/return_objects/bulk_write_error.dart';
+//part 'src/transaction/return_objects/upserted_info.dart';
+part 'src/transaction/tts_collection.dart';
+part 'src/transaction/tts_db.dart';
