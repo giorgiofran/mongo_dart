@@ -207,10 +207,20 @@ This will be done gradually.
 At present we have developed the following operations:
 
 | Command | Status | Legacy alternative | Notes |
-| --- | --- | --- | --- |
-|   `insertOne`  |  Experimental   |  `insert`   | `insertOne` was already present in the previous release, but some changes in the call have been made    |
-| `insertMany` | Experimental | `insert` | Allows to insert many documents in one commnand. It is subject to the max number of documents per message limit (at present <4.4> 100,000)|
-| `modernFind` | Experimental | `legacyFind` | The old method `find` now is simply a wrapper. If you are running mongoDb 3.6 or later, `modernFind` is called, otherwise `legacyFind` |
+| :---: | --- | :---: | --- |
+| - | Not developed | `Save` | This method has been deprecated. |
+|   `insertOne`  |  Experimental   |  `legacyInsert`   | The old method `insert` is a wrapper that calls `insertOne` if you are running MongoDb 3.6 or later, otherwise `legacyInsert`. |
+| `insertMany` | Experimental | `legacyInsertAll` | Allows to insert many documents in one commnand. It is subject to the max number of documents per message limit (at present <4.4> 100,000).The old method `insertAll` is a wrapper that calls `insertMany` if you are running MongoDb 3.6 or later, otherwise `legacyInsertAll`. |
+| [deleteOne][1] |  Experimental   |  -  | Allows to delete one document. [Example][3] [Example 2][4] |
+| [deleteMany][2] | Experimental | `legacyRemove` | The old method `remove` is a wrapper that calls `deleteMany` if you are running MongoDb 3.6 or later, otherwise `legacyRemove`. Allows to delete many documents in one commnand. [Example][5] |
+| [updateOne][6] | Experimental | - | Allows to update one document [Example][7] |
+| [updateMany][8] | Experimental | - | Allows to update many documents in one command. [Example][9] |
+| [modernUpdate][10] | Experimental | `legacyUpdate` | The old method `update` now is only a wrapper. If you are running MongoDb 3.6 or later, `modernUpdate` is called, otherwise `legacyUpdate` |
+| - | To be developed yet | `count` | |
+| - | To be developed yet | `distinct` | |
+| `modernFind` | Experimental | `legacyFind` | The old method `find` now is simply a wrapper. If you are running MongoDb 3.6 or later, `modernFind` is called, otherwise `legacyFind` |
+| `modernFindOne` | Experimental | `legacyFindOne` | The old method `findOne` now is simply a wrapper. If you are running MongoDb 3.6 or later, `modernFindOne` is called, otherwise `legacyFindOne` |
+| `modernFindAndModify`| Experimental | `legacyFindAndModify`| The old method `findandModify` now is simply a wrapper. If you are running MongoDb 3.6 or later, `modernFindAndModify` is called, otherwise `legacyFindAndModify` |
 | `modernAggregate` | Experimental |  `legacyAggregateToStream` | The old method `aggregateToStream` now is simply a wrapper. If you are running mongoDb 3.6 or later, `modernAggregate` is called, otherwise `legacyAggregateToStream`|
 | `modernAggregateCursor` | Experimental | - | This method has no corresponding legacy one, as it returns a cursor and not a Map like the legacy `aggregate`|
 | - | Production  | `aggregate` | The legacy method `aggregate` has no corresponding "moderm" method. It returns a Map. Is it used? |
@@ -220,7 +230,7 @@ At present we have developed the following operations:
 Something on the bulk write side has been done too:
 There is the new collection helper method bulkWrite. The syntax is quite similar to that of the shell:
 `collection.bulkWrite([{'insertOne': {'document': { "_id" : 1, "char" : "Brisbane", "class" : "monk", "lvl" : 4 }}}]);`
-Like the in the shell you can define the `insertOne`, `deleteOne` and `deleteMany` operations. `updateOne`, `updateMany` and `replaceOne` must be still developed.
+Like the one in the shell you can define the `insertOne`, `deleteOne`, `deleteMany`, `updateOne`, `updateMany` and `replaceOne`.
 In addition to the shell operation, you can use also an `insertMany` operation, with the following sybtax:
 `collection.bulkWrite([{'insertMany': {'documents': [{ "_id" : 1, "char" : "Brisbane", "class" : "monk", "lvl" : 4 }]}}]);`
 Unlike the insertMany helper, this bulk operation does not suffer of the max number of documents per message limitation.
@@ -229,6 +239,7 @@ Aside to these changes we have also to mention the new Decimal128 type managemen
 This is inherited from enhancements in the BSON package
 
 Last but not least, some commands:
+
 |Command| Status | Legacy alternative | Notes |
 |--- | --- | --- | --- |
 | `createIndex` | Production | `db.createIndex` | This was needed because the legacy method didn't work any more starting from release 4.0 |
@@ -250,3 +261,15 @@ Last but not least, some commands:
 * [Recent change notes](https://github.com/mongo-dart/mongo_dart/blob/master/CHANGELOG.md)
 
 * Additional [examples](https://github.com/mongo-dart/mongo_dart/tree/master/example) and [tests](https://github.com/mongo-dart/mongo_dart/tree/master/test)
+
+[1]: doc/manual/crud/delete.md#deleteOne
+[2]: doc/manual/crud/delete.md#deleteMany
+[3]: example/manual/crud/delete_one.dart
+[4]: example/manual/crud/delete_one_collation.dart "With collation"
+[5]: example/manual/crud/delete_many.dart
+[6]: doc/manual/crud/update.md#updateOne
+[7]: example/manual/crud/update_one.dart
+[8]: doc/manual/crud/update.md#updateMany
+[9]: example/manual/crud/update_many.dart
+[10]: doc/manual/crud/update.md#modernUpdate
+

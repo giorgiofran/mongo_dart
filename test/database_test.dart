@@ -1,3 +1,4 @@
+@Timeout(Duration(minutes: 10))
 library database_tests;
 
 import 'package:mongo_dart/mongo_dart.dart';
@@ -629,7 +630,7 @@ db.runCommand(
 { "$sort": { "_id": 1 } }
 ]});
  */
-  var pipeline = [];
+  var pipeline = <Map<String, Object>>[];
   var p1 = {
     '\$group': {
       '_id': {'game': '\$game', 'player': '\$player'},
@@ -654,7 +655,7 @@ db.runCommand(
   expect(p1['\$group'], isNotNull);
   // set batchSize parameter to split response to 2 chunks
   var aggregate = await collection
-      .legacyAggregateToStream(pipeline,
+      .aggregateToStream(pipeline,
           cursorOptions: {'batchSize': 1}, allowDiskUse: true)
       .toList();
 
@@ -796,7 +797,7 @@ Future<Cursor> testCursorCreation() async {
   var cursor =
       await ModernCursor(FindOperation(collection, filter: {'ping': 1}));
 
-  expect(cursor, isNotNull);  
+  expect(cursor, isNotNull);
 
   return Cursor(db, collection, null);
 }
@@ -1034,7 +1035,7 @@ Future testIndexCreationOnCollection() async {
     var resInsert = await collection
         .insertOne({'a': 200}, writeConcern: WriteConcern.UNACKNOWLEDGED);
 
-    // Todo correct 
+    // Todo correct
     //expect(resInsert['ok'], 1.0);
 
     var res = await collection.createIndex(key: 'a', unique: true);
@@ -1103,8 +1104,7 @@ Future testIndexCreationErrorHandling() async {
     fail("Expecting an error, but wasn't thrown");
   } on TestFailure {
     rethrow;
-  } catch (e, stack) {
-    print(stack);
+  } catch (e) {
     expect(e[keyErrmsg] ?? e['err'],
         predicate((String msg) => msg.contains('duplicate key error')));
   }
@@ -1144,6 +1144,42 @@ Future testTextIndex() async {
   expect(result.every((element) {
     return (element['_id'] as num).remainder(2) == 1;
   }), isTrue);
+}
+
+Future testTtlIndex() async {
+  var collectionName = getRandomCollectionName();
+  var collection = db.collection(collectionName);
+
+  // Here the CreateIndexOptions is set to null, but you can pass other
+  // parameters if needed
+  var indexOperation = CreateIndexOperation(db, collection, 'closingDate', null,
+      rawOptions: {'expireAfterSeconds': 1});
+  var res = await indexOperation.execute();
+  expect(res['ok'], 1.0);
+
+  await collection.insertAll([
+    {
+      '_id': 1,
+      'name': 'Java Hut',
+      'description': 'Coffee and cakes',
+      'closingDate': DateTime(2000)
+    },
+    {'_id': 2, 'name': 'Burger Buns', 'description': 'Gourmet hamburgers'},
+    {'_id': 3, 'name': 'Coffee Shop', 'description': 'Just coffee'},
+    {
+      '_id': 4,
+      'name': 'Clothes Clothes Clothes',
+      'description': 'Discount clothing'
+    },
+    {'_id': 5, 'name': 'Java Shopping', 'description': 'Indonesian goods'}
+  ]);
+
+  // The cleanup on the server runs every 60 seconds, plus the time to build
+  // the index, plus a little extra...
+  await Future.delayed(Duration(seconds: 90));
+
+  var elements = await collection.find().toList();
+  expect(elements.length, 4);
 }
 
 Future testSafeModeUpdate() async {
@@ -1336,10 +1372,12 @@ Future testUpdateOnClosedConnection() async {
   var collection = db.collection(collectionName);
 
   await db.close();
-  expect(
-      () async => collection.save({'test': 'test'}),
-      throwsA(
-          (MongoDartError e) => e.message == 'DB is not open. State.CLOSED'));
+  try {
+    await collection.insert({'test': 'test'});
+  } catch (e) {
+    expect(e is MongoDartError, isTrue);
+    expect(e.message.endsWith('State.CLOSED'), isTrue);
+  }
 }
 
 Future testReopeningDb() async {
@@ -1402,11 +1440,12 @@ void testInvalidIndexCreationErrorHandling1() {
       throwsA((e) => e is ArgumentError));
 }
 
-Future testFindOneWhileStateIsOpening() {
+Future testFindOneWhileStateIsOpening() async {
   var collectionName = getRandomCollectionName();
 
   var db = Db(DefaultUri);
-  return Future.sync(() {
+  return Future.sync(() async {
+    // ignore: unawaited_futures
     db.open().then((_) {
       return db.collection(collectionName).findOne();
     }).then((res) {
@@ -1414,12 +1453,12 @@ Future testFindOneWhileStateIsOpening() {
       db.close();
     });
 
-    db.collection(collectionName).findOne().then((res) {
-      expect(res, isNull);
-    }).catchError((e) {
+    try {
+      await db.collection(collectionName).findOne();
+    } catch (e) {
       expect(e is MongoDartError, isTrue);
       expect(db.state == State.OPENING, isTrue);
-    });
+    }
   });
 }
 
@@ -1515,6 +1554,7 @@ void main() async {
           'testEnsureIndexWithIndexCreation', testEnsureIndexWithIndexCreation);
       test('testIndexCreationErrorHandling', testIndexCreationErrorHandling);
       test('Text index', testTextIndex);
+      test('Ttl index', testTtlIndex);
     });
 
     group('Field level update tests:', () {

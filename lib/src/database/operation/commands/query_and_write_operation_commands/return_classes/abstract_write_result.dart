@@ -1,4 +1,4 @@
-import 'package:mongo_dart/src/database/operation/mixin/basic_result.dart';
+import 'package:mongo_dart/src/database/operation/commands/mixin/basic_result.dart';
 
 import 'write_concern_error.dart';
 import 'package:mongo_dart/src/database/utils/map_keys.dart';
@@ -136,23 +136,27 @@ abstract class AbstractWriteResult with BasicResult {
       case WriteCommandType.insert:
         return nInserted > 0;
       case WriteCommandType.update:
-        return nModified > 0 || nUpserted > 0;
+        return nModified + nUpserted > 0;
       case WriteCommandType.delete:
         return nRemoved > 0;
+      // mixed case, the writeCommandType is Null
+      default:
+        return nInserted + nModified + nUpserted + nRemoved > 0;
     }
-    return false;
   }
 
-  // Nothing has been procedd
+  // Nothing has been processed
   bool get isFailure {
     switch (writeCommandType) {
       case WriteCommandType.insert:
         return nInserted == 0;
       case WriteCommandType.update:
-        return nModified == 0 && nUpserted == 0;
+        return nModified + nUpserted == 0;
       case WriteCommandType.delete:
         return nRemoved == 0;
+      // mixed case, the writeCommandType is Null
+      default:
+        return nInserted + nModified + nUpserted + nRemoved == 0;
     }
-    return true;
   }
 }

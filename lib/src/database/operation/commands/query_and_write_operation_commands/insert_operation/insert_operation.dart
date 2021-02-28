@@ -1,6 +1,6 @@
 import 'package:mongo_dart/mongo_dart.dart' show DbCollection, ObjectId;
-import 'package:mongo_dart/src/database/operation/base/command_operation.dart';
-import 'package:mongo_dart/src/database/operation/base/operation_base.dart';
+import 'package:mongo_dart/src/database/operation/commands/base/command_operation.dart';
+import 'package:mongo_dart/src/database/operation/commands/base/operation_base.dart';
 import 'package:mongo_dart/src/database/utils/map_keys.dart';
 
 import 'insert_options.dart';
@@ -22,8 +22,8 @@ class InsertOperation extends CommandOperation {
 
     ids = List(documents.length);
     for (var idx = 0; idx < documents.length; idx++) {
-      documents[idx][key_Id] ??= ObjectId();
-      ids[idx] = documents[idx][key_Id];
+      documents[idx][key_id] ??= ObjectId();
+      ids[idx] = documents[idx][key_id];
     }
   }
   List<Map<String, Object>> documents;
