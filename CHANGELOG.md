@@ -2,9 +2,36 @@
 
 ## Recent change notes
 
+### 0.5.0+1
+
+- Updated Readme
+
+### 0.5.0
+
+- Added batchSize variable to ModernCursor class
+- Added cursor example
+- Fixed index count problem in unordered bulk write operations
+- Fixed setting batchSize to 0 in Cursor operaation.
+
+### 0.5.0-beta
+
+- Added tls client and server certificate management
+- Created method .onlyFirst() in class ModernCursor
+
+### 0.5.0-dev.4
+
+- distinct()
+- reorganized folder with new commands
+- more examples and docs
+
 ### 0.5.0-dev.3
 
-- Renamed DeleteRequest class as DeleteStatement
+- Renamed DeleteRequest classes as DeleteStatement
+- updateOne(), replaceOne() and updateMany()
+- modermFindAndModify()
+- bulkWrite()
+- watch()
+- all crud methods have been modified to call the modern version if MongoDb has a version of 3.6 or greater.
 
 ### 0.5.0-dev.2
 

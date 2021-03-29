@@ -1,15 +1,15 @@
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:mongo_dart/src/database/cursor/modern_cursor.dart';
-import 'package:mongo_dart/src/database/operation/commands/administration_commands/get_parameter_command/get_parameter_command.dart';
-import 'package:mongo_dart/src/database/operation/commands/administration_commands/kill_cursors_command/kill_cursors_command.dart';
-import 'package:mongo_dart/src/database/operation/commands/administration_commands/get_all_parameters_command/get_all_parameters_command.dart';
+import 'package:mongo_dart/src/database/commands/administration_commands/get_parameter_command/get_parameter_command.dart';
+import 'package:mongo_dart/src/database/commands/administration_commands/kill_cursors_command/kill_cursors_command.dart';
+import 'package:mongo_dart/src/database/commands/administration_commands/get_all_parameters_command/get_all_parameters_command.dart';
 
-import 'package:mongo_dart/src/database/operation/commands/diagnostic_commands/server_status_command/server_status_command.dart';
-import 'package:mongo_dart/src/database/operation/commands/diagnostic_commands/server_status_command/server_status_options.dart';
-import 'package:mongo_dart/src/database/operation/commands/query_and_write_operation_commands/get_more_command/get_more_command.dart';
-import 'package:mongo_dart/src/database/operation/commands/query_and_write_operation_commands/get_more_command/get_more_options.dart';
-import 'package:mongo_dart/src/database/operation/commands/query_and_write_operation_commands/find_operation/find_operation.dart';
-import 'package:mongo_dart/src/database/operation/commands/query_and_write_operation_commands/find_operation/find_options.dart';
+import 'package:mongo_dart/src/database/commands/diagnostic_commands/server_status_command/server_status_command.dart';
+import 'package:mongo_dart/src/database/commands/diagnostic_commands/server_status_command/server_status_options.dart';
+import 'package:mongo_dart/src/database/commands/query_and_write_operation_commands/get_more_command/get_more_command.dart';
+import 'package:mongo_dart/src/database/commands/query_and_write_operation_commands/get_more_command/get_more_options.dart';
+import 'package:mongo_dart/src/database/commands/query_and_write_operation_commands/find_operation/find_operation.dart';
+import 'package:mongo_dart/src/database/commands/query_and_write_operation_commands/find_operation/find_options.dart';
 import 'package:mongo_dart/src/database/utils/map_keys.dart';
 import 'package:test/test.dart';
 import 'package:uuid/uuid.dart';
@@ -68,7 +68,7 @@ void main() async {
 
           await insertManyDocuments(collection, 10000);
 
-          var cursor = await ModernCursor(FindOperation(collection));
+          var cursor = ModernCursor(FindOperation(collection));
 
           expect(cursor.state, State.INIT);
 
@@ -118,7 +118,7 @@ void main() async {
           var collectionName = getRandomCollectionName();
           var collection = db.collection(collectionName);
           await insertManyDocuments(collection, 10000);
-          var cursor = await ModernCursor(FindOperation(collection));
+          var cursor = ModernCursor(FindOperation(collection));
           expect(cursor.state, State.INIT);
           await cursor.nextObject();
           var command = KillCursorsCommand(collection, [BsonLong(1)]);
@@ -163,7 +163,7 @@ void main() async {
 
           await insertManyDocuments(collection, 10000);
 
-          var cursor = await ModernCursor(FindOperation(collection));
+          var cursor = ModernCursor(FindOperation(collection));
 
           expect(cursor.state, State.INIT);
 
@@ -199,7 +199,7 @@ void main() async {
 
           await insertManyDocuments(collection, 10000);
 
-          var cursor = await ModernCursor(FindOperation(collection));
+          var cursor = ModernCursor(FindOperation(collection));
 
           expect(cursor.state, State.INIT);
 
@@ -233,7 +233,7 @@ void main() async {
 
           await insertManyDocuments(collection, 10000);
 
-          var cursor = await ModernCursor(FindOperation(collection,
+          var cursor = ModernCursor(FindOperation(collection,
               findOptions: FindOptions(batchSize: 1)));
           await cursor.nextObject();
           var options = GetMoreOptions(batchSize: 10001);
@@ -252,7 +252,7 @@ void main() async {
 
           await insertManyDocuments(collection, 10000);
 
-          var cursor = await ModernCursor(FindOperation(collection));
+          var cursor = ModernCursor(FindOperation(collection));
           await cursor.nextObject();
 
           var command = GetMoreCommand(collection, cursor.cursorId);
